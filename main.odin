@@ -27,7 +27,7 @@ main :: proc() {
   opt: Options
   style: flags.Parsing_Style = .Odin
 
-  flags.register_type_setter(my_custom_type_setter)
+  flags.register_type_setter(input_arg_setter)
   flags.parse_or_exit(&opt, os.args, style)
 
   todos, err := read_todos()
@@ -51,7 +51,7 @@ main :: proc() {
   print_todos(todos)
 }
 
-my_custom_type_setter :: proc(
+input_arg_setter :: proc(
 	data: rawptr,
 	data_type: typeid,
 	unparsed_value: string,
