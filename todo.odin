@@ -19,26 +19,34 @@ TodoError :: enum {
   Invalid_Index,
 }
 
-handle_cmd :: proc(opt: Options) -> (Todos, Error) {
+handle_cmd :: proc(opt: Options) -> Error {
   todos, err := read_todos()
   if err != TodoError.None {
-    return todos, err
+    return err
   }
+  fmt.println(opt.op)
 
-  #partial switch opt.op {
+  switch opt.op {
   case .add:
     add_todo(&todos, opt.input.(string))
+    print_done_todos(todos)
   case .complete:
     toggle_todo(&todos, opt.input.(int))
+    print_done_todos(todos)
   case .delete:
     remove_todo(&todos, opt.input.(int))
+    print_done_todos(todos)
+  case .list, .all:
+    print_todos(todos)
+  case .default:
+    print_done_todos(todos)
   }
 
   if err := store_todos(&todos); err != nil {
     fmt.printfln("error storing todos: %v", err)
   }
 
-  return todos, TodoError.None
+  return TodoError.None
 
 }
 
@@ -113,3 +121,24 @@ print_todos :: proc(t: Todos) {
 
   table.write_plain_table(stdout, &tbl)
 }
+
+print_done_todos :: proc(t: Todos) {
+  ft := filter_todos(t, is_incomplete)
+  print_todos(ft)
+  delete(ft)
+}
+
+filter_todos :: proc(t: Todos, filter: proc(Todo) -> bool) -> Todos {
+  ft := make(Todos)
+  for v in t {
+    if filter(v) {
+      append(&ft, v)
+    }
+  }
+  return ft
+}
+
+is_incomplete :: proc(t: Todo) -> bool {
+  return !t.completed
+}
+

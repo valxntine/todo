@@ -7,6 +7,8 @@ import "core:strconv"
 import "base:runtime"
 
 Operation :: enum {
+  default,
+  all,
   list,
   add,
   delete,
@@ -30,13 +32,11 @@ main :: proc() {
   flags.register_type_setter(input_arg_setter)
   flags.parse_or_exit(&opt, os.args, style)
 
-  todos, err := handle_cmd(opt)
+  err := handle_cmd(opt)
   if err != TodoError.None {
     fmt.eprintfln("error handling command: %v", err)
     os.exit(1)
   }
-
-  print_todos(todos)
 }
 
 input_arg_setter :: proc(
