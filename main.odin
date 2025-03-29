@@ -52,7 +52,7 @@ main :: proc() {
 }
 
 input_arg_setter :: proc(
-	data: rawptr,
+	data_ptr: rawptr,
 	data_type: typeid,
 	unparsed_value: string,
 	args_tag: string,
@@ -61,15 +61,15 @@ input_arg_setter :: proc(
 	handled: bool,
 	alloc_error: runtime.Allocator_Error,
 ) {
-  if data_type == Input {
-    handled = true
-    ptr := cast(^Input)data
-    i, ok := strconv.parse_int(unparsed_value)
-    if ok {
-      ptr^ = i
-    } else {
-      ptr^ = unparsed_value
-    }
+  data := any{ data=data_ptr, id=data_type}
+  switch &value in data {
+    case Input:
+      handled = true
+      if i, ok := strconv.parse_int(unparsed_value); ok {
+        value = i
+      } else {
+        value = unparsed_value
+      }
   }
   return
 }
