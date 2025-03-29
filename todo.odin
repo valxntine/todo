@@ -29,17 +29,17 @@ handle_cmd :: proc(opt: Options) -> Error {
   switch opt.op {
   case .add:
     add_todo(&todos, opt.input.(string))
-    print_done_todos(todos)
+    print_incomplete_todos(todos)
   case .complete:
     toggle_todo(&todos, opt.input.(int))
-    print_done_todos(todos)
+    print_incomplete_todos(todos)
   case .delete:
     remove_todo(&todos, opt.input.(int))
-    print_done_todos(todos)
+    print_incomplete_todos(todos)
   case .list, .all:
     print_todos(todos)
   case .default:
-    print_done_todos(todos)
+    print_incomplete_todos(todos)
   }
 
   if err := store_todos(&todos); err != nil {
@@ -122,7 +122,7 @@ print_todos :: proc(t: Todos) {
   table.write_plain_table(stdout, &tbl)
 }
 
-print_done_todos :: proc(t: Todos) {
+print_incomplete_todos :: proc(t: Todos) {
   ft := filter_todos(t, is_incomplete)
   print_todos(ft)
   delete(ft)
