@@ -19,6 +19,29 @@ TodoError :: enum {
   Invalid_Index,
 }
 
+handle_cmd :: proc(opt: Options) -> (Todos, Error) {
+  todos, err := read_todos()
+  if err != TodoError.None {
+    return todos, err
+  }
+
+  #partial switch opt.op {
+  case .add:
+    add_todo(&todos, opt.input.(string))
+  case .complete:
+    toggle_todo(&todos, opt.input.(int))
+  case .delete:
+    remove_todo(&todos, opt.input.(int))
+  }
+
+  if err := store_todos(&todos); err != nil {
+    fmt.printfln("error storing todos: %v", err)
+  }
+
+  return todos, TodoError.None
+
+}
+
 add_todo :: proc(t: ^Todos, title: string) -> Error {
   todo: Todo = Todo{
     title = title,

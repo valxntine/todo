@@ -30,24 +30,12 @@ main :: proc() {
   flags.register_type_setter(input_arg_setter)
   flags.parse_or_exit(&opt, os.args, style)
 
-  todos, err := read_todos()
+  todos, err := handle_cmd(opt)
   if err != TodoError.None {
-    fmt.printfln("error reading todos: %v", err)
+    fmt.eprintfln("error handling command: %v", err)
     os.exit(1)
   }
 
-  #partial switch opt.op {
-  case .add:
-    add_todo(&todos, opt.input.(string))
-  case .complete:
-    toggle_todo(&todos, opt.input.(int))
-  case .delete:
-    remove_todo(&todos, opt.input.(int))
-  }
-
-  if err := store_todos(&todos); err != nil {
-    fmt.printfln("error storing todos: %v", err)
-  }
   print_todos(todos)
 }
 
