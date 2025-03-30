@@ -13,6 +13,7 @@ Operation :: enum {
   add,
   delete,
   complete,
+  edit,
 }
 
 Input :: union {
@@ -22,7 +23,8 @@ Input :: union {
 
 Options :: struct {
   op: Operation `args:"pos=0" usage:"Operation to perform on todos"`,
-  input: Input `args:"pos=1"`
+  input: Input `args:"pos=1"`,
+  new_title: string `args:"pos=2"`
 }
 
 main :: proc() {

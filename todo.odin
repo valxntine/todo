@@ -24,23 +24,24 @@ handle_cmd :: proc(opt: Options) -> Error {
   if err != TodoError.None {
     return err
   }
-  fmt.println(opt.op)
+
+  show_complete: bool
 
   switch opt.op {
   case .add:
     add_todo(&todos, opt.input.(string))
-    print_incomplete_todos(todos)
   case .complete:
     toggle_todo(&todos, opt.input.(int))
-    print_incomplete_todos(todos)
   case .delete:
     remove_todo(&todos, opt.input.(int))
-    print_incomplete_todos(todos)
   case .list, .all:
-    print_todos(todos)
+    show_complete = true
+  case .edit:
+    edit_todo(&todos, opt.input.(int), opt.new_title)
   case .default:
-    print_incomplete_todos(todos)
   }
+
+  print_todos(todos, show_complete)
 
   if err := store_todos(&todos); err != nil {
     fmt.printfln("error storing todos: %v", err)
@@ -102,13 +103,16 @@ now_to_string :: proc(t: time.Time) -> string {
   return fmt.tprintf("%s %s", time.to_string_dd_mm_yyyy(t, date_buf[:]), time.to_string_hms(t, hms_buf[:]))
 }
 
-print_todos :: proc(t: Todos) {
+print_todos :: proc(t: Todos, show_complete: bool = false) {
   tbl: table.Table
   table.init(&tbl)
   table.caption(&tbl, "Valentine's Todos")
   table.padding(&tbl, 1, 3)
   table.header(&tbl, "ID", "Title", "Completed", "Created At", "Completed At")
   for td, idx in t {
+    if !show_complete && td.completed {
+      continue
+    }
     complete := "\u274C"
     
     if td.completed {
@@ -120,12 +124,6 @@ print_todos :: proc(t: Todos) {
   stdout := table.stdio_writer()
 
   table.write_plain_table(stdout, &tbl)
-}
-
-print_incomplete_todos :: proc(t: Todos) {
-  ft := filter_todos(t, is_incomplete)
-  print_todos(ft)
-  delete(ft)
 }
 
 filter_todos :: proc(t: Todos, filter: proc(Todo) -> bool) -> Todos {
