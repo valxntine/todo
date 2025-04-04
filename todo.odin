@@ -38,6 +38,8 @@ handle_cmd :: proc(opt: Options) -> Error {
     show_complete = true
   case .edit:
     edit_todo(&todos, opt.input.(int), opt.new_title)
+  case .clean:
+    clean_todos(&todos)
   case .default:
   }
 
@@ -88,6 +90,14 @@ edit_todo :: proc(t: ^Todos, index: int, title: string) -> Error {
 
   t[index].title = title
   return nil
+}
+
+clean_todos :: proc(t: ^Todos) {
+  new := filter_todos(t^, is_incomplete)
+  clear(t)
+  for todo, idx in new {
+    append(t, todo)
+  }
 }
 
 validate_index :: proc(t: ^Todos, index: int) -> Error {

@@ -14,6 +14,7 @@ Operation :: enum {
   delete,
   complete,
   edit,
+  clean,
 }
 
 Input :: union {

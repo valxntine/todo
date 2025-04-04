@@ -108,6 +108,13 @@ test_now_string :: proc(t: ^testing.T) {
   testing.expectf(t, actual == expected, "expected: %s got: %s", expected, actual)
 }
 
+@(test)
+test_clean :: proc(t: ^testing.T) {
+  todos := base_todos()
+  todo.clean_todos(&todos)
+  testing.expect(t, len(todos) == 2)
+}
+
 base_todos :: proc() -> todo.Todos {
   return todo.Todos{
     {
